@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block body%}
+
+<div class="container">
+    <h1>Register</h1>
+    <form id="reg-form" action="{{url_for('main.register')}}" method="POST">
+        <input
+            type="text"
+            name="username"
+            placeholder="username"
+            class="input-field"
+        />
+        <input
+            type="password"
+            name="password"
+            placeholder="password"
+            class="input-field"
+        />
+        <input type="submit" value="Register" class="btn-register" onClick="setRegister('register')"/>
+    </form>
+</div>
+
+<script>
+    function setRegister(action) {
+        let form = document.getElementById("reg-form");
+        form.action = "{{url_for('main.login')}}";
+        form.method = 'POST';
+    }
+</script>
+
+{% endblock %}

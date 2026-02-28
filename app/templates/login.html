@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block body%}
+
+<div class="container">
+    <h1>Log in</h1>
+    <form id="auth-form" action="{{url_for('main.login')}}" method="POST">
+        <input
+            type="text"
+            name="username"
+            placeholder="username"
+            class="input-field"
+        />
+        <input
+            type="password"
+            name="password"
+            placeholder="password"
+            class="input-field"
+        />
+        <input type="submit" value="Login" class="btn-login" onClick="setLogin('login')"/>
+        <a href="{{url_for('main.register_page')}}">Register here</a>
+    </form>
+</div>
+
+<script>
+    function setLogin(action) {
+        let form = document.getElementById("auth-form");
+        form.action = "{{url_for('main.login')}}";
+        form.method = 'POST';
+    }
+
+</script>
+
+{% endblock %}
