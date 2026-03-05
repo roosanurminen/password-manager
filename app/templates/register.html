@@ -15,16 +15,8 @@
             placeholder="password"
             class="input-field"
         />
-        <input type="submit" value="Register" class="btn-register" onClick="setRegister('register')"/>
+        <input type="submit" value="Register" class="btn-register"/>
     </form>
 </div>
-
-<script>
-    function setRegister(action) {
-        let form = document.getElementById("reg-form");
-        form.action = "{{url_for('main.login')}}";
-        form.method = 'POST';
-    }
-</script>
 
 {% endblock %}

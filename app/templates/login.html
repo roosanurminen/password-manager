@@ -20,13 +20,4 @@
     </form>
 </div>
 
-<script>
-    function setLogin(action) {
-        let form = document.getElementById("auth-form");
-        form.action = "{{url_for('main.login')}}";
-        form.method = 'POST';
-    }
-
-</script>
-
 {% endblock %}
