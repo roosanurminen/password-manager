@@ -42,3 +42,7 @@ class Credentials(db.Model):
         db.UniqueConstraint('user_id', 'url', 'username', name='unique_user_service_account'),
     )
 
+    def encrypt_password(self, password):
+        return ""
+    def decrypt_password(self, enc_password, password):
+        return ""

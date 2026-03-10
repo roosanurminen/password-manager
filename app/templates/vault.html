@@ -1,10 +1,33 @@
 {% extends "base.html" %} 
 {% block body%}
-
-<div class="container">
-    <h1>Welcome, {{username}}</h1>
-    <p></p>
-    <a href type="{{url_for('main.logout')}}" class="btn-logout">Logout</a>
+<div class="nav-bar">
+    <h3>SecureVault</h3>
+    <div class="nav-bar-left">
+        <button type="button" class="btn-add-item">Add item</button>
+        <a class="vault-link" href="{{url_for('main.logout')}}">Log Out</a> 
+    </div>
+</div>
+<div class="vault-page">
+    <div class="credential-list">
+        <h2>Your credentials</h2>
+        {% if credentials|length > 0 %}
+            {% for credential in credentials %}
+            <div class="credential-content">
+                <div class="credential-info">
+                    <h4>{{ credential.service }}</h4>
+                    <p>{{ credential.username }}</p>
+                    <p>{{ credential.url }}</p>
+                </div>
+                <div class="credential-actions">
+                    <button><i class="fa-solid fa-eye"></i></button>
+                    <button><i class="fa-solid fa-trash"></i></button>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No credentials saved yet.</p>
+        {% endif %}
+    </div>
 </div>
 
 {% endblock %}

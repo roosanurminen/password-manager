@@ -1,22 +1,41 @@
 {% extends "base.html" %} {% block body%}
-
-<div class="container">
-    <h1>Register</h1>
-    <form id="reg-form" action="{{url_for('main.register')}}" method="POST">
+<div class="page">
+    <h1>SecureVault</h1>
+    <div class="container">
+        <div class="container-header">
+            <h2>Create account</h2>
+            <p>Start securing your passwords today.</p>
+        </div>
+    <form id="form" action="{{url_for('main.register')}}" method="POST">
+        <label for="username">Username</label>
         <input
             type="text"
             name="username"
-            placeholder="username"
-            class="input-field"
+            placeholder="Choose a username"
         />
+        <label for="password">Password</label>
         <input
             type="password"
             name="password"
-            placeholder="password"
-            class="input-field"
+            placeholder="Create a strong password"
+            class="password"
         />
-        <input type="submit" value="Register" class="btn-register"/>
+        <label class="below" for="password">Must be at least 12 characters with numbers and symbols.</label>
+        <input type="submit" value="Create account" class="btn"/>
     </form>
+    <div class="already-account">
+        <p>Already have an account?</p>
+        <a class="link" href="{{url_for('main.login')}}">Sign in</a>
+    </div>
+</div>
+
+    {% with messages = get_flashed_messages(with_categories=True) %} 
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %} 
+    {% endwith %}
 </div>
 
 {% endblock %}
