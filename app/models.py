@@ -19,6 +19,7 @@ class Users(db.Model):
 
     def set_password(self, password):
         return ph.hash(password)
+    
     def check_password(self, stored_hash, password):
         try:
             ph.verify(stored_hash, password)
@@ -43,6 +44,29 @@ class Credentials(db.Model):
     )
 
     def encrypt_password(self, password):
+        salt = secrets.token_bytes(16)
+        key = derive_key(stored_hash, salt)
+        cipher = AES.new(key, AES.MODE_GCM)
+        ciphertext, tag = cipher.encrypt_and_digest(plaintext)
         return ""
     def decrypt_password(self, enc_password, password):
+        key = derive_key(stored_hash, salt)
+        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+
+        try:
+            plaintext = cipher.decrypt_and_verify(ciphertext, tag)
+        except ValueError:
+            print("Decryption failed")
+            return ""
         return ""
+
+    def derive_key(stored_hash, salt):
+        return hash_secret_raw(
+            secret=stored_hash.encode(),
+            salt=salt,
+            time_cost=3,
+            memory_cost=12288,
+            parallelism=1,
+            hash_len=32,
+            type=argon2.Type.ID
+        )

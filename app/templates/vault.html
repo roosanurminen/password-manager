@@ -28,6 +28,72 @@
             <p>No credentials saved yet.</p>
         {% endif %}
     </div>
+    {% with messages = get_flashed_messages(with_categories=True) %} 
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %} 
+    {% endwith %}
+</div>
+<div class="modal">
+    <div class="modal-content">
+        <h3>Add Credential</h3>
+        <button class='btn-close'>x</button>
+        <form id="form" action="{{url_for('main.add_credential')}}" method="POST">
+            <label for="service">Service</label>
+            <input
+                type="text"
+                name="service"
+                placeholder="Service"
+            />
+            <label for="username">Username</label>
+            <input
+                type="text"
+                name="username"
+                placeholder="Username"
+            />
+            <label for="password">Password</label>
+            <input
+                type="password"
+                name="password"
+                placeholder="●●●●●●●●●●●●"
+            />
+            <label for="url">URL</label>
+            <input
+                type="text"
+                name="url"
+                placeholder="URL"
+            />
+            <input type="submit" value="Save" class="btn"/>
+        </form>
+        {% with messages = get_flashed_messages(with_categories=True) %} 
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %} 
+        {% endwith %}
+    </div>
 </div>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const modal = document.querySelector(".modal");
+    const openBtn = document.querySelector(".btn-add-item");
+    const closeBtn = document.querySelector(".btn-close");
+    openBtn.addEventListener("click", () => {
+        modal.style.display = "flex";
+    });
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+    closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+    });
+</script>
 {% endblock %}

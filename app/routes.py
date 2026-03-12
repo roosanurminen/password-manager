@@ -31,13 +31,14 @@ def check_master_password_strength(password):
         return "Password must contain at least one special character"
     
 
-
-    
 def validate_service_credentials(service, username, password, url, user_id):
     if not service or not username or not password or not url:
         return "All fields are required"
     
-    duplicate_credentials = db.session.execute(db.select(Credentials).filter_by(user_id=user_id, username=username, service=service)).scalar_one_or_none()
+    duplicate_credentials = db.session.execute(db.select(Credentials).filter_by(user_id=user_id, username=username, url=url)).scalar_one_or_none()
+    if duplicate_credentials:
+        return "This service with this username already exists"
+    
     return None
 
 @main.before_request
@@ -141,17 +142,16 @@ def add_credential():
     password = request.form.get("password", "")
     url = request.form.get("url", "")
 
-
     error = validate_service_credentials(service, username, password, url, user.id)
     if error:
         flash(error, 'error')
-        return redirect(url_for("main.register"))
-    
-    error = check_master_password_strength(password)
-    if error:
-        flash(error, 'error')
-        return redirect(url_for("main.register"))
-    return ""
+        return redirect(url_for("main.vault"))
+
+    credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password), user_id=user.id)
+    db.session.add(credential)
+    db.session.commit()
+    flash("Credential saved successfully", "success")
+    return redirect(url_for("main.vault"))
 
 # Logout
 @main.route("/logout")
