@@ -1,7 +1,13 @@
 from . import db
 import argon2
+import secrets
+from Crypto.Cipher import AES
+import os
+import json
+import secrets
+from argon2.low_level import hash_secret_raw
 
-# password thing
+
 ph = argon2.PasswordHasher(
     time_cost=3,
     memory_cost=12288,
@@ -11,13 +17,13 @@ ph = argon2.PasswordHasher(
     type=argon2.Type.ID
 )
 
-# Database Models
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     master_password_hash = db.Column(db.String(255), nullable=False)
 
-    def set_password(self, password):
+    @staticmethod
+    def set_password(password):
         return ph.hash(password)
     
     def check_password(self, stored_hash, password):
@@ -37,29 +43,13 @@ class Credentials(db.Model):
     service = db.Column(db.String(80), nullable=False)
     url = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(80), nullable=False)
-    enc_password = db.Column(db.String(255), nullable=False)
+    enc_password = db.Column(db.LargeBinary, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     __table_args__ = (
         db.UniqueConstraint('user_id', 'url', 'username', name='unique_user_service_account'),
     )
 
-    def encrypt_password(self, password):
-        salt = secrets.token_bytes(16)
-        key = derive_key(stored_hash, salt)
-        cipher = AES.new(key, AES.MODE_GCM)
-        ciphertext, tag = cipher.encrypt_and_digest(plaintext)
-        return ""
-    def decrypt_password(self, enc_password, password):
-        key = derive_key(stored_hash, salt)
-        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
-
-        try:
-            plaintext = cipher.decrypt_and_verify(ciphertext, tag)
-        except ValueError:
-            print("Decryption failed")
-            return ""
-        return ""
-
+    @staticmethod
     def derive_key(stored_hash, salt):
         return hash_secret_raw(
             secret=stored_hash.encode(),
@@ -70,3 +60,29 @@ class Credentials(db.Model):
             hash_len=32,
             type=argon2.Type.ID
         )
+
+    @staticmethod
+    def encrypt_password(password, master_password_hash):
+        salt = secrets.token_bytes(16)
+        key = Credentials.derive_key(master_password_hash, salt)
+        cipher = AES.new(key, AES.MODE_GCM)
+        enc_password, tag = cipher.encrypt_and_digest(password.encode('utf-8'))
+        return salt + cipher.nonce + tag + enc_password
+    
+    @staticmethod
+    def decrypt_password(enc_blob, master_password_hash):
+        salt = enc_blob[0:16]
+        nonce = enc_blob[16:32]
+        tag = enc_blob[32:48]
+        enc_password = enc_blob[48:]
+
+        key = Credentials.derive_key(master_password_hash, salt)
+        cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
+
+        try:
+            password = cipher.decrypt_and_verify(enc_password, tag)
+            return password.decode("utf-8")
+        except ValueError:
+            return None
+        except Exception:
+            return None

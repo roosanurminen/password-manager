@@ -31,8 +31,8 @@ def check_master_password_strength(password):
         return "Password must contain at least one special character"
     
 
-def validate_service_credentials(service, username, password, url, user_id):
-    if not service or not username or not password or not url:
+def validate_service_credentials(service, username, password, url, master_password, user_id):
+    if not service or not username or not password or not url or not master_password:
         return "All fields are required"
     
     duplicate_credentials = db.session.execute(db.select(Credentials).filter_by(user_id=user_id, username=username, url=url)).scalar_one_or_none()
@@ -45,15 +45,12 @@ def validate_service_credentials(service, username, password, url, user_id):
 def refresh_session_expiry():
   session.modified = True
 
-
-# Routes
 @main.route("/")
 def index():
     if get_session_user():
         return redirect(url_for("main.vault"))
     return render_template("login.html")
 
-# Login
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -72,7 +69,6 @@ def login():
     if not user or not user.check_password(user.master_password_hash, password):
         flash("Invalid username or password. Please try again!", "error")
         return redirect(url_for("main.login"))
-        #return render_template("login.html",  error="Invalid credentials")
 
     session.clear()
     print("id", user.id)
@@ -81,7 +77,6 @@ def login():
     return redirect(url_for("main.vault"))
     
 
-# Register
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "GET":
@@ -112,7 +107,7 @@ def register():
     flash("Account created successfully", "success")
     return redirect(url_for("main.login"))
 
-# VAULT GET DATA
+
 @main.route("/vault", methods=["GET"])
 def vault():
     user = get_session_user()
@@ -130,7 +125,7 @@ def vault():
     return response 
     
 
-@main.route("/vault", methods=["POST"])
+@main.route("/vault/add", methods=["POST"])
 def add_credential():
     user = get_session_user()
     if not user:
@@ -141,21 +136,89 @@ def add_credential():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
     url = request.form.get("url", "")
+    master_password = request.form.get("master_password", "")
 
-    error = validate_service_credentials(service, username, password, url, user.id)
+    if not user.check_password(user.master_password_hash, master_password):
+        flash("Incorrect master password", 'error')
+        return redirect(url_for("main.vault"))
+
+    error = validate_service_credentials(service, username, password, url, master_password, user.id)
     if error:
         flash(error, 'error')
         return redirect(url_for("main.vault"))
+    
+    master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
 
-    credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password), user_id=user.id)
+    credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password, master_password_hash), user_id=user.id)
     db.session.add(credential)
     db.session.commit()
     flash("Credential saved successfully", "success")
     return redirect(url_for("main.vault"))
 
-# Logout
+
+@main.route("/vault/show", methods=["POST"])
+def show_password():
+    user = get_session_user()
+    if not user:
+        session.clear()
+        return redirect(url_for("main.login"))
+    
+    master_password = request.form.get("master_password", "")
+    credential_id = request.form.get("id_show", "")
+
+    if not user.check_password(user.master_password_hash, master_password):
+        flash("Incorrect master password", 'error')
+        return redirect(url_for("main.vault"))
+
+    master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
+    enc_password = db.session.execute(db.select(Credentials.enc_password).filter_by(id=credential_id, user_id=user.id)).scalar_one_or_none()
+    
+    if not enc_password:
+        flash("Credential not found", "error")
+        return redirect(url_for("main.vault"))
+    
+    password = Credentials.decrypt_password(enc_password, master_password_hash)
+    
+    if not password:
+        flash("Something went wrong")
+        return redirect(url_for("main.vault"))
+    
+    flash(f"Password: {password}", "success")
+    return redirect(url_for("main.vault"))
+
+@main.route("/vault/delete", methods=["POST"])
+def delete_credential():
+    user = get_session_user()
+    if not user:
+        session.clear()
+        return redirect(url_for("main.login"))
+    
+    master_password = request.form.get("master_password", "")
+    credential_id = request.form.get("id_delete", "")
+
+    if not user.check_password(user.master_password_hash, master_password):
+        flash("Incorrect master password", 'error')
+        return redirect(url_for("main.vault"))
+
+    credential = db.session.execute(db.select(Credentials).filter_by(id=credential_id, user_id=user.id)).scalar_one_or_none()
+    
+    if not credential:
+        flash("Credential not found", "error")
+        return redirect(url_for("main.vault"))
+    
+    try:
+        db.session.delete(credential)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong", "error")
+        return redirect(url_for("main.vault"))
+    
+    flash("Credential deleted successfully", "success")
+    return redirect(url_for("main.vault"))
+
+
 @main.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("main.login"))
-   

@@ -57,7 +57,7 @@ p {
     border-color: #1e293b;
     box-shadow: 0 8px 25px #191141;
 }
-.container-header h2 {
+.container-header h2, .container-header h3 {
     margin-top: 0;
     margin-bottom: 0.2rem;
 }
@@ -110,7 +110,8 @@ input::placeholder {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px;
+    /*padding: 40px;*/
+    padding: 100px 40px 40px 40px;
 }
 
 .credential-list {
@@ -133,6 +134,7 @@ input::placeholder {
     border-radius: 0.6rem;
     max-width: 800px;
     padding: 20px 15px;
+    margin-bottom: 10px;
 }
 .credential-info {
     display: flex;
@@ -163,12 +165,14 @@ input::placeholder {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 40px; 
+    padding: 30px 40px 30px 40px; 
     border-bottom: 3px solid #191044;
     height: 60px;
     width: 100%;
     top: 0;
     z-index: 1000;
+    position: fixed;
+    background-color: #131022;
 }
 .nav-bar-left {
     gap: 1.5rem;
@@ -195,7 +199,7 @@ input::placeholder {
 }
 
 
-.modal {
+.modal-add, .modal-show, .modal-delete {
     display: none;
     position: fixed;
     top: 0;
@@ -206,9 +210,9 @@ input::placeholder {
     justify-content: center;
     align-items: center;
     padding: 10px;
+    z-index: 2000;
 }
-
-.modal-content {
+.modal-content-add, .modal-content-show, .modal-content-delete {
     position: relative;
     padding: 32px;
     width: 100%;
@@ -222,8 +226,7 @@ input::placeholder {
     border-width: thin;
     border-color: #1e293b;
 }
-
-.btn-close {
+.btn-close-add, .btn-close-show {
     background: none;        
     border: none;
     cursor: pointer;
@@ -232,4 +235,18 @@ input::placeholder {
     position: absolute;
     top: 16px;
     right: 16px;
+}
+.modal-delete-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.btn-delete {
+    background-color: #991b1b;
+    width: 5em;
+    cursor: pointer;
+}
+.btn-cancel {
+    width: 5em;
+    cursor: pointer;
 }

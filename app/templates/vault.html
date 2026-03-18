@@ -9,7 +9,7 @@
 </div>
 <div class="vault-page">
     <div class="credential-list">
-        <h2>Your credentials</h2>
+        <h2>Saved credentials</h2>
         {% if credentials|length > 0 %}
             {% for credential in credentials %}
             <div class="credential-content">
@@ -19,8 +19,12 @@
                     <p>{{ credential.url }}</p>
                 </div>
                 <div class="credential-actions">
-                    <button><i class="fa-solid fa-eye"></i></button>
-                    <button><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" class="btn-eye" data-id="{{ credential.id }}">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <button type="button" class="btn-trash" data-id="{{ credential.id }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </div>
             </div>
             {% endfor %}
@@ -36,10 +40,10 @@
         {% endif %} 
     {% endwith %}
 </div>
-<div class="modal">
-    <div class="modal-content">
-        <h3>Add Credential</h3>
-        <button class='btn-close'>x</button>
+<div class="modal-add">
+    <div class="modal-content-add">
+        <h3>Add new credential</h3>
+        <button class='btn-close-add'>x</button>
         <form id="form" action="{{url_for('main.add_credential')}}" method="POST">
             <label for="service">Service</label>
             <input
@@ -65,35 +69,116 @@
                 name="url"
                 placeholder="URL"
             />
+            <hr/>
+            <label for="master_password">Confirm your master password</label>
+            <input 
+                type="password" 
+                name="master_password" 
+                placeholder="Your master password"
+            />
             <input type="submit" value="Save" class="btn"/>
         </form>
-        {% with messages = get_flashed_messages(with_categories=True) %} 
-            {% if messages %}
-                {% for category, message in messages %}
-                    <p class="{{ category }}">{{ message }}</p>
-                {% endfor %}
-            {% endif %} 
-        {% endwith %}
     </div>
 </div>
-
+<div class="modal-show">
+    <div class="modal-content-show">
+        <h3>View password</h3>
+        <button class='btn-close-show'>x</button>
+        <form id="form" action="{{url_for('main.show_password')}}" method="POST">
+            <label for="master_password">Enter your master password to reveal</label>
+            <input 
+                type="password" 
+                name="master_password" 
+                placeholder="Your master password"
+            />
+            <input 
+                type="hidden" 
+                name="id_show" 
+                value=""
+            />
+            <input type="submit" value="Show" class="btn"/>
+        </form>
+    </div>
+</div>
+<div class="modal-delete">
+    <div class="modal-content-delete">
+        <div class="container-header">
+            <h3>Delete credential</h3>
+            <p>This action cannot be undone.</p>
+        </div>
+        <form id="form" action="{{url_for('main.delete_credential')}}" method="POST">
+            <label for="master_password">Enter your master password to confirm deletion</label>
+            <input 
+                type="password" 
+                name="master_password" 
+                placeholder="Your master password"
+            />
+            <input 
+                type="hidden" 
+                name="id_delete" 
+                value=""
+            />
+            <div class="modal-delete-btns">
+                <input type="button" value="Cancel" class="btn-cancel"/>
+                <input type="submit" value="Delete" class="btn-delete"/>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
+
 
 {% block scripts %}
 <script>
-    const modal = document.querySelector(".modal");
-    const openBtn = document.querySelector(".btn-add-item");
-    const closeBtn = document.querySelector(".btn-close");
-    openBtn.addEventListener("click", () => {
-        modal.style.display = "flex";
+    const modal_add = document.querySelector(".modal-add");
+    const openBtn_add = document.querySelector(".btn-add-item");
+    const closeBtn_add = document.querySelector(".btn-close-add");
+    openBtn_add.addEventListener("click", () => {
+        modal_add.style.display = "flex";
     });
     window.addEventListener("click", (e) => {
-        if (e.target === modal) {
-            modal.style.display = "none";
+        if (e.target === modal_add) {
+            modal_add.style.display = "none";
         }
     });
-    closeBtn.addEventListener("click", () => {
-        modal.style.display = "none";
+    closeBtn_add.addEventListener("click", () => {
+        modal_add.style.display = "none";
     });
+</script>
+<script>
+    const modal_show = document.querySelector(".modal-show");
+    const closeBtn_show = document.querySelector(".btn-close-show");
+    const id_show = modal_show.querySelector("input[name='id_show']")
+    
+    document.querySelectorAll(".btn-eye").forEach(btn => {
+        btn.addEventListener("click", () => {
+            id_show.value = btn.dataset.id;
+            modal_show.style.display = "flex";
+        });
+    });
+    window.addEventListener("click", (e) => {
+        if (e.target === modal_show) {
+            modal_show.style.display = "none";
+        }
+    });
+    closeBtn_show.addEventListener("click", () => {
+        modal_show.style.display = "none";
+    });
+</script>
+<script>
+    const modal_delete = document.querySelector(".modal-delete");
+    const id_delete = modal_delete.querySelector("input[name='id_delete']")
+    const btn_cancel = document.querySelector(".btn-cancel");
+
+    document.querySelectorAll(".btn-trash").forEach(btn => {
+        btn.addEventListener("click", () => {
+            id_delete.value = btn.dataset.id;
+            modal_delete.style.display = "flex";
+        });
+    });
+    btn_cancel.addEventListener("click", () => {
+        modal_delete.style.display = "none";
+    });
+
 </script>
 {% endblock %}
