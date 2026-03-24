@@ -1,0 +1,81 @@
+name: Security CI Pipeline
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sonarqube:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: SAST - SonarQube
+        uses: SonarSource/sonarqube-scan-action@v6.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          output: sonarqube.json
+
+      - name: Upload Sonarqube results as artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: sonarqube-results
+          path: sonarqube.json
+
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: SCA - Snyk
+        uses: snyk/actions/python@v0.5.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          output: snyk.json
+
+      - name: Upload Snyk results as artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: snyk-results
+          path: snyk.json
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build Docker image
+        run: docker build -t password-manager:${{ github.sha }} .
+
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@v0.25.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: json
+          exit-code: 0
+          output: trivyfs.json
+
+      - name: Upload Trivy file scan results as artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: trivy-file-scan-results
+          path: trivyfs.json
+      
+      - name: Trivy container scan
+        uses: aquasecurity/trivy-action@v0.25.0
+        with:
+          scan-type: image
+          image-ref: 'password-manager:${{ github.sha }}'
+          format: json
+          exit-code: 0
+          output: trivyimage.json
+
+      - name: Upload Trivy image scan results as artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: trivy-image-scan-results
+          path: trivyimage.json
+      
