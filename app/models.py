@@ -17,6 +17,7 @@ ph = argon2.PasswordHasher(
     type=argon2.Type.ID
 )
 
+
 class Users(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -50,9 +51,9 @@ class Credentials(db.Model):
     )
 
     @staticmethod
-    def derive_key(stored_hash, salt):
+    def derive_key(master_password, salt):
         return hash_secret_raw(
-            secret=stored_hash.encode(),
+            secret=master_password.encode("utf-8"),
             salt=salt,
             time_cost=3,
             memory_cost=12288,
@@ -60,23 +61,24 @@ class Credentials(db.Model):
             hash_len=32,
             type=argon2.Type.ID
         )
+    
 
     @staticmethod
-    def encrypt_password(password, master_password_hash):
+    def encrypt_password(password, master_password):
         salt = secrets.token_bytes(16)
-        key = Credentials.derive_key(master_password_hash, salt)
+        key = Credentials.derive_key(master_password, salt)
         cipher = AES.new(key, AES.MODE_GCM)
         enc_password, tag = cipher.encrypt_and_digest(password.encode('utf-8'))
         return salt + cipher.nonce + tag + enc_password
     
     @staticmethod
-    def decrypt_password(enc_blob, master_password_hash):
+    def decrypt_password(enc_blob, master_password):
         salt = enc_blob[0:16]
         nonce = enc_blob[16:32]
         tag = enc_blob[32:48]
         enc_password = enc_blob[48:]
 
-        key = Credentials.derive_key(master_password_hash, salt)
+        key = Credentials.derive_key(master_password, salt)
         cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
 
         try:

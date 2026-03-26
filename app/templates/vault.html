@@ -45,6 +45,7 @@
         <h3>Add new credential</h3>
         <button class='btn-close-add'>x</button>
         <form id="form" action="{{url_for('main.add_credential')}}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="service">Service</label>
             <input
                 type="text"
@@ -85,6 +86,7 @@
         <h3>View password</h3>
         <button class='btn-close-show'>x</button>
         <form id="form" action="{{url_for('main.show_password')}}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="master_password">Enter your master password to reveal</label>
             <input 
                 type="password" 
@@ -107,6 +109,7 @@
             <p>This action cannot be undone.</p>
         </div>
         <form id="form" action="{{url_for('main.delete_credential')}}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="master_password">Enter your master password to confirm deletion</label>
             <input 
                 type="password" 

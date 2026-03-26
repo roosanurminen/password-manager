@@ -12,7 +12,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: SAST - SonarQube
-        uses: SonarSource/sonarqube-scan-action@v6.0.0
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: SCA - Snyk
-        uses: snyk/actions/python@v0.5.0
+        uses: snyk/actions/python@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -50,7 +50,7 @@ jobs:
         run: docker build -t password-manager:${{ github.sha }} .
 
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@v0.25.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           scan-type: fs
           scan-ref: .
@@ -65,7 +65,7 @@ jobs:
           path: trivyfs.json
       
       - name: Trivy container scan
-        uses: aquasecurity/trivy-action@v0.25.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           scan-type: image
           image-ref: 'password-manager:${{ github.sha }}'
@@ -78,4 +78,3 @@ jobs:
         with:
           name: trivy-image-scan-results
           path: trivyimage.json
-      

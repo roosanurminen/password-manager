@@ -1,45 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, make_response, flash
 from .models import Users, Credentials
 from . import db
+from .helpers import validate_vault_credentials, get_session_user, check_master_password_strength, validate_service_credentials
+
 main = Blueprint("main", __name__)
-
-def validate_vault_credentials(username, password):
-    if not username or not password:
-        return "All fields are required"
-    if len(username) > 80:
-        return "Username too long"
-    if len(password) > 128:
-        return "Password too long"
-    return None
-
-def get_session_user():
-    user_id = session.get("user_id")
-    if not user_id:
-        return None
-    return db.session.execute(db.select(Users).filter_by(id=user_id)).scalar_one_or_none()
-
-def check_master_password_strength(password):
-    if len(password) < 12:
-        return "Password must be at least 12 characters"
-    if not any(c.isupper() for c in password):
-        return "Pass"
-    if not any(c.islower() for c in password):
-        return "oo"
-    if not any(c.isdigit() for c in password):
-        return ",,"
-    if not any(c in "!@#$%&*()_-+={}[]|\:;<>,.?/" for c in password):
-        return "Password must contain at least one special character"
-    
-
-def validate_service_credentials(service, username, password, url, master_password, user_id):
-    if not service or not username or not password or not url or not master_password:
-        return "All fields are required"
-    
-    duplicate_credentials = db.session.execute(db.select(Credentials).filter_by(user_id=user_id, username=username, url=url)).scalar_one_or_none()
-    if duplicate_credentials:
-        return "This service with this username already exists"
-    
-    return None
 
 @main.before_request
 def refresh_session_expiry():
@@ -51,11 +15,12 @@ def index():
         return redirect(url_for("main.vault"))
     return render_template("login.html")
 
-@main.route("/login", methods=["GET", "POST"])
+@main.route("/login", methods=['GET'])
 def login():
-    if request.method == "GET":
-        return render_template("login.html")
-    
+    return render_template("login.html")
+
+@main.route("/login", methods=["POST"])
+def login_post():
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
 
@@ -75,13 +40,14 @@ def login():
     session['user_id'] = user.id
     session.permanent = True
     return redirect(url_for("main.vault"))
-    
 
-@main.route("/register", methods=["GET", "POST"])
+
+@main.route("/register", methods=['GET'])
 def register():
-    if request.method == "GET":
-        return render_template("register.html")
-    
+    return render_template("register.html")
+
+@main.route("/register", methods=["POST"])
+def register_post():    
     username = request.form.get("username", "").strip()
     password = request.form.get("password", "")
 
@@ -118,7 +84,6 @@ def vault():
     credentials = db.session.execute(db.select(Credentials.id, Credentials.service, Credentials.username, Credentials.url).filter_by(user_id=user.id)).all()
     response = make_response(render_template("vault.html", user_id=user.id, credentials=credentials))
 
-    print(credentials)
     response.headers["Cache-Control"] = "no-store"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
@@ -147,9 +112,9 @@ def add_credential():
         flash(error, 'error')
         return redirect(url_for("main.vault"))
     
-    master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
+    #master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
 
-    credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password, master_password_hash), user_id=user.id)
+    credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password, master_password), user_id=user.id)
     db.session.add(credential)
     db.session.commit()
     flash("Credential saved successfully", "success")
@@ -170,14 +135,14 @@ def show_password():
         flash("Incorrect master password", 'error')
         return redirect(url_for("main.vault"))
 
-    master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
+    #master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
     enc_password = db.session.execute(db.select(Credentials.enc_password).filter_by(id=credential_id, user_id=user.id)).scalar_one_or_none()
-    
+
     if not enc_password:
         flash("Credential not found", "error")
         return redirect(url_for("main.vault"))
     
-    password = Credentials.decrypt_password(enc_password, master_password_hash)
+    password = Credentials.decrypt_password(enc_password, master_password)
     
     if not password:
         flash("Something went wrong")
@@ -185,6 +150,7 @@ def show_password():
     
     flash(f"Password: {password}", "success")
     return redirect(url_for("main.vault"))
+    #return render_template("vault.html", password=password)
 
 @main.route("/vault/delete", methods=["POST"])
 def delete_credential():
