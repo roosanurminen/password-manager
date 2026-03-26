@@ -4,7 +4,6 @@
     <h3>SecureVault</h3>
     <div class="nav-bar-left">
         <button type="button" class="btn-add-item">Add item</button>
-        <!--<a class="vault-link" href="{{url_for('main.logout')}}">Log Out</a>-->
         <form action="{{ url_for('main.logout') }}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-logout">Log Out</button>

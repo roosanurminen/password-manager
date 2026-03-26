@@ -5,9 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from os import environ
 from datetime import timedelta
 
-# Configure SQL Alchemy
 db = SQLAlchemy()
-
 
 csrf = CSRFProtect()
 
