@@ -17,12 +17,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
 
-      - name: Upload Sonarqube results as artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: sonarqube-results
-          path: sonarqube.json
-
   snyk:
     runs-on: ubuntu-latest
     steps:
@@ -31,12 +25,6 @@ jobs:
         uses: snyk/actions/python@9adf32b1121593767fc3c057af55b55db032dc04
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Upload Snyk results as artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: snyk-results
-          path: snyk.json
 
   trivy:
     runs-on: ubuntu-latest
