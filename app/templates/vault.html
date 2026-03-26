@@ -4,7 +4,11 @@
     <h3>SecureVault</h3>
     <div class="nav-bar-left">
         <button type="button" class="btn-add-item">Add item</button>
-        <a class="vault-link" href="{{url_for('main.logout')}}">Log Out</a> 
+        <!--<a class="vault-link" href="{{url_for('main.logout')}}">Log Out</a>-->
+        <form action="{{ url_for('main.logout') }}" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-logout">Log Out</button>
+        </form>
     </div>
 </div>
 <div class="vault-page">
@@ -44,7 +48,7 @@
     <div class="modal-content-add">
         <h3>Add new credential</h3>
         <button class='btn-close-add'>x</button>
-        <form id="form" action="{{url_for('main.add_credential')}}" method="POST">
+        <form action="{{url_for('main.add_credential')}}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="service">Service</label>
             <input
@@ -85,7 +89,7 @@
     <div class="modal-content-show">
         <h3>View password</h3>
         <button class='btn-close-show'>x</button>
-        <form id="form" action="{{url_for('main.show_password')}}" method="POST">
+        <form action="{{url_for('main.show_password')}}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="master_password">Enter your master password to reveal</label>
             <input 
@@ -108,7 +112,7 @@
             <h3>Delete credential</h3>
             <p>This action cannot be undone.</p>
         </div>
-        <form id="form" action="{{url_for('main.delete_credential')}}" method="POST">
+        <form action="{{url_for('main.delete_credential')}}" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <label for="master_password">Enter your master password to confirm deletion</label>
             <input 

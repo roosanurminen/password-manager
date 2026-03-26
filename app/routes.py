@@ -9,7 +9,7 @@ main = Blueprint("main", __name__)
 def refresh_session_expiry():
   session.modified = True
 
-@main.route("/")
+@main.route("/", methods=["GET"])
 def index():
     if get_session_user():
         return redirect(url_for("main.vault"))
@@ -112,8 +112,6 @@ def add_credential():
         flash(error, 'error')
         return redirect(url_for("main.vault"))
     
-    #master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
-
     credential = Credentials(service=service, url=url, username=username, enc_password=Credentials.encrypt_password(password, master_password), user_id=user.id)
     db.session.add(credential)
     db.session.commit()
@@ -135,7 +133,6 @@ def show_password():
         flash("Incorrect master password", 'error')
         return redirect(url_for("main.vault"))
 
-    #master_password_hash = db.session.execute(db.select(Users.master_password_hash).filter_by(id=user.id)).scalar_one_or_none()
     enc_password = db.session.execute(db.select(Credentials.enc_password).filter_by(id=credential_id, user_id=user.id)).scalar_one_or_none()
 
     if not enc_password:
@@ -150,7 +147,6 @@ def show_password():
     
     flash(f"Password: {password}", "success")
     return redirect(url_for("main.vault"))
-    #return render_template("vault.html", password=password)
 
 @main.route("/vault/delete", methods=["POST"])
 def delete_credential():
@@ -175,7 +171,7 @@ def delete_credential():
     try:
         db.session.delete(credential)
         db.session.commit()
-    except Exception as e:
+    except Exception:
         db.session.rollback()
         flash("Something went wrong", "error")
         return redirect(url_for("main.vault"))
@@ -184,7 +180,7 @@ def delete_credential():
     return redirect(url_for("main.vault"))
 
 
-@main.route("/logout")
+@main.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     return redirect(url_for("main.login"))
