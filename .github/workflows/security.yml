@@ -62,3 +62,20 @@ jobs:
         with:
           name: trivy-image-scan-results
           path: trivyimage.json
+  
+  cyclonedx:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Generate SBOM
+        uses: CycloneDX/gh-python-generate-sbom@v2
+        with:
+          input: ./requirements.txt
+          output: ./bom.json
+          format: json
+      
+      - name: Upload SBOM as artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: sbom
+          path: bom.json
