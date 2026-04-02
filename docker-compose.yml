@@ -13,6 +13,7 @@ services:
     volumes:
         - pgdata:/var/lib/postgresql/data
     healthcheck:
+      # Check that database is ready before starting dependent services
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 20s
@@ -30,7 +31,7 @@ services:
       - .:/app
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy  # Wait until DB is ready before starting app
  
 volumes:
   pgdata:

@@ -5,6 +5,7 @@
     <div class="nav-bar-left">
         <button type="button" class="btn-add-item">Add item</button>
         <form action="{{ url_for('main.logout') }}" method="POST">
+            <!-- CSRF protection token required for POST requests -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn-logout">Log Out</button>
         </form>
@@ -35,44 +36,43 @@
             <p>No credentials saved yet.</p>
         {% endif %}
     </div>
-    {% with messages = get_flashed_messages(with_categories=True) %} 
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %} 
-    {% endwith %}
 </div>
 <div class="modal-add">
     <div class="modal-content-add">
         <h3>Add new credential</h3>
         <button class='btn-close-add'>x</button>
         <form action="{{url_for('main.add_credential')}}" method="POST">
+            <!-- CSRF protection token required for POST requests -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
             <label for="service">Service</label>
             <input
                 type="text"
                 name="service"
                 placeholder="Service"
             />
+
             <label for="username">Username</label>
             <input
                 type="text"
                 name="username"
                 placeholder="Username"
             />
+
             <label for="password">Password</label>
             <input
                 type="password"
                 name="password"
                 placeholder="●●●●●●●●●●●●"
             />
+
             <label for="url">URL</label>
             <input
                 type="text"
                 name="url"
                 placeholder="URL"
             />
+
             <hr/>
             <label for="master_password">Confirm your master password</label>
             <input 
@@ -89,18 +89,22 @@
         <h3>View password</h3>
         <button class='btn-close-show'>x</button>
         <form action="{{url_for('main.show_password')}}" method="POST">
+            <!-- CSRF protection token required for POST requests -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
             <label for="master_password">Enter your master password to reveal</label>
             <input 
                 type="password" 
                 name="master_password" 
                 placeholder="Your master password"
             />
+            
             <input 
                 type="hidden" 
                 name="id_show" 
                 value=""
             />
+            
             <input type="submit" value="Show" class="btn"/>
         </form>
     </div>
@@ -112,18 +116,22 @@
             <p>This action cannot be undone.</p>
         </div>
         <form action="{{url_for('main.delete_credential')}}" method="POST">
+            <!-- CSRF protection token required for POST requests -->
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            
             <label for="master_password">Enter your master password to confirm deletion</label>
             <input 
                 type="password" 
                 name="master_password" 
                 placeholder="Your master password"
             />
+            
             <input 
                 type="hidden" 
                 name="id_delete" 
                 value=""
             />
+            
             <div class="modal-delete-btns">
                 <input type="button" value="Cancel" class="btn-cancel"/>
                 <input type="submit" value="Delete" class="btn-delete"/>
@@ -134,7 +142,8 @@
 {% endblock %}
 
 
-{% block scripts %}
+{% block scripts %} 
+{{ super() }}
 <script>
     const modal_add = document.querySelector(".modal-add");
     const openBtn_add = document.querySelector(".btn-add-item");

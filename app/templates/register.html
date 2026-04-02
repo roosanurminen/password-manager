@@ -6,37 +6,32 @@
             <h2>Create account</h2>
             <p>Start securing your passwords today.</p>
         </div>
-    <form action="{{url_for('main.register_post')}}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-        <label for="username">Username</label>
-        <input
-            type="text"
-            name="username"
-            placeholder="Choose a username"
-        />
-        <label for="password">Password</label>
-        <input
-            type="password"
-            name="password"
-            placeholder="Create a strong password"
-            class="password"
-        />
-        <label class="below" for="password">Must be at least 12 characters with numbers and symbols.</label>
-        <input type="submit" value="Create account" class="btn"/>
-    </form>
-    <div class="already-account">
-        <p>Already have an account?</p>
-        <a class="link" href="{{url_for('main.login')}}">Sign in</a>
+        <form action="{{url_for('main.register_post')}}" method="POST">
+            <!-- CSRF protection token required for POST requests -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+            <label for="username">Username</label>
+            <input
+                type="text"
+                name="username"
+                placeholder="Choose a username"
+            />
+
+            <label for="password">Password</label>
+            <input
+                type="password"
+                name="password"
+                placeholder="Create a strong password"
+                class="password"
+            />
+            <label class="below" for="password">Must be at least 12 characters with numbers and symbols.</label>
+            
+            <input type="submit" value="Create account" class="btn"/>
+        </form>
+        <div class="already-account">
+            <p>Already have an account?</p>
+            <a class="link" href="{{url_for('main.login')}}">Sign in</a>
+        </div>
     </div>
 </div>
-
-    {% with messages = get_flashed_messages(with_categories=True) %} 
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %} 
-    {% endwith %}
-</div>
-
 {% endblock %}

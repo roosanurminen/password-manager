@@ -10,9 +10,33 @@
     <title>SecureVault</title>
 </head>
     <body>
+        <!-- Global Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=True) %} 
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="msg {{ category }}" >
+                            <span>{{ message }}</span>
+                            <button class='flash-close'>x</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %} 
+        {% endwith %}
+
+        <!-- Page-specific content -->
         {% block body %}
         {% endblock %}
+
+        <!-- Page-specific scripts -->
         {% block scripts %}
+        <script>
+            document.querySelectorAll(".flash-close").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    btn.parentElement.remove();
+                });
+            });
+        </script>
         {% endblock %}
     </body>
 </html>
