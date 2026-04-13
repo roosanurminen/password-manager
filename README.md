@@ -45,6 +45,8 @@ This project was developed as part of the course COMP.SEC.300.
 - No 2FA or rate limiting
 - No HTTPS -> secure cookie flag not enabled
 - No unit/integration tests implemented
+- No logging/monitoring implemented
+- Sensitive data shown via flash messages
 - Some vulnerabilities from base Docker image remain
 - No autofill support (cannot be used across other applications)
 
