@@ -24,6 +24,11 @@ def create_app():
     # Session expires after 30 minutes of inactivity
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
+    # Configure session cookie security settings
+    app.config["SESSION_COOKIE_HTTPONLY"] = True # Prevent JavaScript from accessing the session cookie
+    app.config["SESSION_COOKIE_SECURE"] = False # Should be True in production to ensure that cookies are only sent over HTTPS 
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax" # Helps protect against CSRF by restricting when cookies are sent
+
     # Initialize database connection
     db.init_app(app)
 
