@@ -1,5 +1,5 @@
-# SecureVault – Password Manager
-SecureVault is a web-based password manager built with Flask.
+# Password Manager
+This is a web-based password manager built with Flask.
 The main goal of this project is to practice secure programming principles, especially in areas like authentication, encryption and handling sensitive data.
 
 This project was developed as part of the course COMP.SEC.300.
